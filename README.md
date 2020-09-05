@@ -1,3 +1,4 @@
+***NOTE: This application is still under development and the actual functionality yet to be implemented. Stay Tuned.*** 
 # Flashlight <img align="left" src="media/logo.png">
 ***Let's End Darkness Together***
 
