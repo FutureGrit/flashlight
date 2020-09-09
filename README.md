@@ -5,6 +5,10 @@
 
 This application will turn your smartphone into a super flashlight. You'll find the basic torch functionality with this app. The entire UI consists of a single button. Pressing it will turn the light on and off.
 
+
+![App Screenshot](screenshot.png)
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
