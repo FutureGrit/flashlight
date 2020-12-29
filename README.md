@@ -10,7 +10,7 @@ This application will turn your smartphone into a super flashlight. You'll find 
 
 
 ## Roadmap
-* Implement of "flashlignt" in native android.
+* Implement "flashlight" functionality in native for android.
 * Create bridge between native code and flutter widget to control flashlight.
 * Performance Improvement
 * Testing
