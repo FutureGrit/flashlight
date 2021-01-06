@@ -1,6 +1,9 @@
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+import 'package:flutter/services.dart';
+
 void main() {
   runApp(
     MaterialApp(
@@ -20,6 +23,16 @@ class Flashlight extends StatefulWidget {
 }
 
 class _FlashlightState extends State<Flashlight> {
+  // set the name of the channel
+  static const platform = const MethodChannel("flashlight_activity");
+
+  _updateFlashLight() async {
+    try {
+      await platform.invokeMethod("startFlashlight");
+    } on PlatformException catch (e) {
+      print(e.message);
+    }
+  }
   // TODO 1: Implement actual working functionality for turn on/off flashlight
   // TODO 2: Implement RIVE animation for flashlight button status
   // TODO 3: Sync sound with animation
@@ -31,6 +44,7 @@ class _FlashlightState extends State<Flashlight> {
     final player = AudioCache();
     player.play('sound_flashlight_button1.wav');
 
+    _updateFlashLight();
     setState(() {
       isFlashlightOn = !isFlashlightOn;
     });
