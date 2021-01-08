@@ -1,12 +1,10 @@
 package com.futuregrit.flashlight
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.hardware.camera2.CameraAccessException
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -18,26 +16,35 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import java.lang.RuntimeException
+import java.util.*
 
 
-class MainActivity: FlutterActivity() {
-    private val API_LEVEL = Build.VERSION.SDK_INT
 
+class MainActivity : FlutterActivity() {
     private val CAMERA_PERMISSION = 200
-    var flashLightStatus: Boolean = false
+    var camera: Camera? = null
+    var parameters: Camera.Parameters? = null
+    //var hasFlash: Boolean by Delegates.notNull<Boolean>()
+
+    private var flashLightStatus: Boolean = false
+    private var isStatusUpdated: Boolean = false
 
     private val CHANNEL = "flashlight_activity"
 
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor, CHANNEL).setMethodCallHandler { call, _ ->
+        MethodChannel(flutterEngine.dartExecutor, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "startFlashlight") {
+                //result.success(startFlashlight())
                 startFlashlight()
+                result.success(isStatusUpdated)
             }
         }
     }
 
-    private fun startFlashlight() {
+    private fun startFlashlight(): Boolean {
         /* Check for camera permission on device higher then API level 23 */
         val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -49,6 +56,7 @@ class MainActivity: FlutterActivity() {
         } else {
             turnOnFlashlightBelowVersionCodeM()
         }
+        return true
     }
 
     private fun setupPermission() {
@@ -69,38 +77,56 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     private fun turnOnFlashlightAboveVersionCodeM() {
-        Log.e("API>=23","*********** Flashlight for API >= M(SDK 23) *****************")
+        Log.e("API>=23", "*********** Flashlight for API >= M(SDK 23) *****************")
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraId = cameraManager.cameraIdList[0]
 
-        if (!flashLightStatus) {
-            try{
-                cameraManager.setTorchMode(cameraId, true)
-                this.flashLightStatus = true
-            } catch (e: CameraAccessException) {
-                e.printStackTrace();
-            }
+        try {
+            this.flashLightStatus = !flashLightStatus
+            cameraManager.setTorchMode(cameraId, flashLightStatus)
 
-        } else {
-            try{
-                cameraManager.setTorchMode(cameraId, false)
-                this.flashLightStatus = false
-            } catch (e: CameraAccessException) {
-                e.printStackTrace();
-            }
+            isStatusUpdated = true
+        } catch (e: CameraAccessException) {
+            e.printStackTrace();
         }
-
     }
 
     /* This will be called if API Version Code is below M (SDK 23)*/
-    private  fun turnOnFlashlightBelowVersionCodeM() {
+    private fun turnOnFlashlightBelowVersionCodeM() {
+        Log.e("API<23", "*********** Flashlight for API Below 23 *****************")
+        if (camera == null && parameters == null) {
+            try {
+                camera = Camera.open()
+                parameters = camera?.parameters
+            } catch (e: RuntimeException) {
+                Toast.makeText(this, "Camera is being used", Toast.LENGTH_LONG).show()
+                return
+            }
 
+        }
+
+        if (!flashLightStatus) {
+            Log.e("API<23", "*********** Flashlight for API Below 23 ON *****************")
+            parameters?.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+            camera?.parameters = parameters
+            Objects.requireNonNull(camera)?.startPreview()
+            flashLightStatus = true
+        } else {
+            Log.e("API<23", "*********** Flashlight for API Below 23 OFF *****************")
+            parameters?.flashMode = Camera.Parameters.FLASH_MODE_OFF
+            camera?.parameters = parameters
+            Objects.requireNonNull(camera)?.stopPreview()
+            flashLightStatus = false
+        }
+        isStatusUpdated = true
     }
 
-    // TODO: Check if flashlight is supported or not
+    private fun checkFlashAvailability(): Boolean {
+        return applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+    }
+
+    // TODO: Check camera availability for API Above 23
     // TODO: Change Message for granting permission
-    // TODO: Return true when successfully updated flashlight so UI can be updated accordingly
 }
