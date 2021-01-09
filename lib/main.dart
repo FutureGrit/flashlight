@@ -1,7 +1,6 @@
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 
-import 'dart:async';
 import 'package:flutter/services.dart';
 
 void main() {
@@ -23,31 +22,25 @@ class Flashlight extends StatefulWidget {
 }
 
 class _FlashlightState extends State<Flashlight> {
-  // set the name of the channel
-  static const platform = const MethodChannel("flashlight_activity");
+  bool isFlashlightOn = false;
 
-  _updateFlashLight() async {
+  // set the name of the channel
+  static const platform = const MethodChannel("com.futuregrit/flashlight");
+
+  _updateFlashlight() async {
     try {
-      await platform.invokeMethod("startFlashlight");
+      if (await platform.invokeMethod("startFlashlight")) {
+        /// Perform setState after native function finished or Flashlight is
+        /// turned ON or OFF
+        setState(() {
+          final player = AudioCache();
+          player.play('sound_flashlight_button1.wav');
+          isFlashlightOn = !isFlashlightOn;
+        });
+      }
     } on PlatformException catch (e) {
       print(e.message);
     }
-  }
-  // TODO 1: Implement actual working functionality for turn on/off flashlight
-  // TODO 2: Implement RIVE animation for flashlight button status
-  // TODO 3: Sync sound with animation
-  // TODO 4: Update app icon
-
-  bool isFlashlightOn = false;
-
-  void updateFlashlight() {
-    final player = AudioCache();
-    player.play('sound_flashlight_button1.wav');
-
-    _updateFlashLight();
-    setState(() {
-      isFlashlightOn = !isFlashlightOn;
-    });
   }
 
   @override
@@ -64,7 +57,7 @@ class _FlashlightState extends State<Flashlight> {
               splashColor: Colors.transparent,
 
               onPressed: () {
-                updateFlashlight();
+                _updateFlashlight();
               },
               child: isFlashlightOn
                   ? Image.asset('images/flashlightOn.png')
