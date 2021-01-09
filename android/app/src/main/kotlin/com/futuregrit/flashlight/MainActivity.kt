@@ -94,6 +94,7 @@ class MainActivity : FlutterActivity() {
                 parameters = camera?.parameters
             } catch (e: RuntimeException) {
                 Toast.makeText(this, "Camera is being used.", Toast.LENGTH_LONG).show()
+                isStatusUpdated = false
                 return
             }
         }
