@@ -36,6 +36,9 @@ class MainActivity : FlutterActivity() {
                 startFlashlight()
                 result.success(isStatusUpdated)
             }
+            if (call.method == "checkFlashAvailability") {
+                result.success(checkFlashAvailability())
+            }
         }
     }
 
