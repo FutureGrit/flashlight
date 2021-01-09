@@ -43,12 +43,8 @@ class _FlashlightState extends State<Flashlight> {
   Widget build(BuildContext context) {
     return FractionallySizedBox(
       widthFactor: 0.48,
-      child: FlatButton(
-        // Removing default button padding
-        padding: EdgeInsets.all(0),
-        splashColor: Colors.transparent,
-
-        onPressed: () {
+      child: GestureDetector(
+        onTap: () {
           _updateFlashlight();
         },
         child: isFlashlightOn

@@ -42,12 +42,17 @@ class Home extends StatelessWidget {
   }
 
   Widget flashNotAvailable() {
-    return Center(
-      child: Container(
-        color: Colors.yellow,
-        width: double.infinity,
-        height: double.infinity,
-        child: Text('Flash is not available in your device.'),
+    return Container(
+      margin: EdgeInsets.all(40.0),
+      padding: EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: Color(0xffFD9808),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        'Flash is not available in your device.',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+        textAlign: TextAlign.center,
       ),
     );
   }
